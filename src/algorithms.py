@@ -1,4 +1,5 @@
 import heapq
+from src.models import Graph
 
 
 class GraphTraversal:
@@ -44,3 +45,30 @@ class PathFinder:
                     heapq.heappush(priority_queue, (distance, v))
 
         return distances
+
+
+class SpanningTree:
+    @staticmethod
+    def prim(graph, start_node):
+        g = Graph()
+        visited = set()
+
+        priority_queue = [(0, None, start_node)]
+
+        while priority_queue and len(visited) < len(graph.get_nodes()):
+            weight, u, v = heapq.heappop(priority_queue)
+
+            if v in visited:
+                continue
+
+            visited.add(v)
+
+            if u is not None:
+                g.add_edge(u, v, weight)
+
+            for neighbor in graph.get_neighbors(v):
+                if neighbor not in visited:
+                    w = graph.get_weight(v, neighbor)
+                    heapq.heappush(priority_queue, (w, v, neighbor))
+
+        return g
