@@ -21,3 +21,14 @@ class Graph:
 
     def get_weight(self, u, v):
         return self.adj_list.get(u, {}).get(v)
+
+    def total_weight(self):
+        total = 0
+        seen_edges = set()
+        for u in self.adj_list:
+            for v, weight in self.adj_list[u].items():
+                edge = tuple(sorted((u, v)))
+                if edge not in seen_edges:
+                    total += weight
+                    seen_edges.add(edge)
+        return total
