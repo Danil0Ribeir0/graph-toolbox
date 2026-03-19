@@ -37,7 +37,7 @@ class TestGraphAlgorithms:
 
         assert GraphTraversal.is_connected(g) is False
 
-    def test_dijkstra_shortest_path():
+    def test_dijkstra_shortest_path(self):
         g = Graph()
         g.add_edge("A", "B", 1)
         g.add_edge("B", "C", 2)
