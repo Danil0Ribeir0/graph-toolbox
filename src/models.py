@@ -7,7 +7,7 @@ class Graph:
         for node in [u, v]:
             if node not in self.adj_list:
                 self.adj_list[node] = set()
-        
+
         self.adj_list[u].add(v)
         if not self.directed:
             self.adj_list[v].add(u)
