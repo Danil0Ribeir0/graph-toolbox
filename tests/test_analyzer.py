@@ -48,7 +48,18 @@ class TestGraphAlgorithms:
         distancias = PathFinder.dijkstra(g, "A")
 
         assert distancias["C"] == 3
+    
+    def test_prim_mst_total_weight(self):
+        from src.algorithms import SpanningTree
+        g = Graph()
+        g.add_edge("A", "B", 1)
+        g.add_edge("B", "C", 5)
+        g.add_edge("C", "A", 10)
 
+        mst = SpanningTree.prim(g, "A")
+
+        assert mst.total_weight() == 6
+        assert len(mst.get_nodes()) == 3
 
 class TestEulerianValidator:
     def test_has_cycle_true_when_connected_and_even_degrees(self):
