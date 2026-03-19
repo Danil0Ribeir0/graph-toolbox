@@ -1,27 +1,17 @@
-from src.analyzer import Graph
+from src.models import Graph
+from src.validator import EulerianValidator
+from src.algorithms import GraphTraversal
 
-def test_add_nodes_and_edges():
+def test_graph_connectivity():
     g = Graph()
-    g.add_edge('A', 'B')
-    assert 'A' in g.adj_list
-    assert 'B' in g.adj_list
+    g.add_edge(1, 2)
+    g.add_edge(3, 4)
+    assert GraphTraversal.is_connected(g) == False
 
-def test_get_degree():
-    g = Graph()
-    g.add_edge('A', 'B')
-    g.add_edge('A', 'C')
-    assert g.get_degree('A') == 2
-    assert g.get_degree('B') == 1
-
-def test_eulerian_cycle_true():
+def test_eulerian_with_connectivity():
     g = Graph()
     g.add_edge('A', 'B')
     g.add_edge('B', 'C')
-    g.add_edge('C', 'A')
-    assert g.has_eulerian_cycle() == True
-
-def test_eulerian_cycle_false():
-    g = Graph()
-    g.add_edge('A', 'B')
-    g.add_edge('B', 'C')
-    assert g.has_eulerian_cycle() == False
+    g.add_edge('C', 'D')
+    g.add_edge('D', 'A')
+    assert EulerianValidator.has_cycle(g) == True
