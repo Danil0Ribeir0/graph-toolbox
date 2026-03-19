@@ -37,6 +37,18 @@ class TestGraphAlgorithms:
 
         assert GraphTraversal.is_connected(g) is False
 
+    def test_dijkstra_shortest_path(self):
+        g = Graph()
+        g.add_edge("A", "B", 1)
+        g.add_edge("B", "C", 2)
+        g.add_edge("A", "C", 10)
+
+        from src.algorithms import PathFinder
+
+        distancias = PathFinder.dijkstra(g, "A")
+
+        assert distancias["C"] == 3
+
 
 class TestEulerianValidator:
     def test_has_cycle_true_when_connected_and_even_degrees(self):
