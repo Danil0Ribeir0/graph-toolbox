@@ -18,6 +18,6 @@ class Graph:
 
     def get_neighbors(self, node):
         return list(self.adj_list.get(node, {}).keys())
-    
+
     def get_weight(self, u, v):
         return self.adj_list.get(u, {}).get(v)
