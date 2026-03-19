@@ -20,14 +20,22 @@ jobs:
     - name: Configurar o Python
       uses: actions/setup-python@v5
       with:
-        python-version: "3.14"
+        python-version: "3.12"
 
     - name: Instalar dependências
       run: |
         python -m pip install --upgrade pip
-        pip install pytest
+        pip install pytest flake8 pytest-cov
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
 
-    - name: Rodar os testes automatizados
+    - name: Verificar Estilo de Código (Linting)
       run: |
-        python -m pytest
+        # Para se houver erros de sintaxe ou símbolos indefinidos
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
+        # Avisa sobre problemas de estilo (PEP8) sem travar o build
+        flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
+
+    - name: Rodar Testes com Relatório de Cobertura
+      run: |
+        # Roda os testes e mostra quais linhas do 'src' não foram testadas
+        python -m pytest --cov=src --cov-report=term-missing
