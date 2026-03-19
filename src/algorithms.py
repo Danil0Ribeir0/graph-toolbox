@@ -4,6 +4,8 @@ class GraphTraversal:
         nodes = graph.get_nodes()
         if not nodes: return True
         
+        #Testando a proteção de branch
+
         visited = set()
         start_node = nodes[0]
         
