@@ -37,14 +37,21 @@ class Graph:
 
     def total_weight(self) -> float:
         total: float = 0.0
-        seen_edges: Set[Tuple[str, str]] = set()
 
+        if self.directed:
+            for u in self.adj_list:
+                total += sum(self.adj_list[u].values())
+            return total
+
+        seen_edges: Set[frozenset] = set()
+        
         for u in self.adj_list:
             for v, weight in self.adj_list[u].items():
-                edge = tuple(sorted((str(u), str(v))))
+                edge = frozenset([u, v])
                 if edge not in seen_edges:
                     total += weight
                     seen_edges.add(edge)
+                    
         return total
 
     def is_connected(self, connection_type: str = "strong") -> bool:
