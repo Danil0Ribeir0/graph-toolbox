@@ -85,6 +85,24 @@ class TestGraphModels:
 
         assert empty_directed_graph.get_in_degree("B") == 1
         assert empty_directed_graph.get_out_degree("B") == 0
+    
+    def test_directed_graph_strong_connectivity(self, empty_directed_graph):
+        empty_directed_graph.add_edge("A", "B")
+        empty_directed_graph.add_edge("B", "C")
+        empty_directed_graph.add_edge("C", "A")
+        assert empty_directed_graph.is_connected(connection_type="strong") is True
+
+    def test_directed_graph_not_strongly_connected(self, empty_directed_graph):
+        empty_directed_graph.add_edge("A", "B")
+        empty_directed_graph.add_edge("B", "C")
+        assert empty_directed_graph.is_connected(connection_type="strong") is False
+
+    def test_directed_graph_weak_connectivity(self, empty_directed_graph):
+        empty_directed_graph.add_edge("A", "B")
+        empty_directed_graph.add_edge("C", "B")
+        
+        assert empty_directed_graph.is_connected(connection_type="strong") is False
+        assert empty_directed_graph.is_connected(connection_type="weak") is True
 
 
 class TestGraphAlgorithms:

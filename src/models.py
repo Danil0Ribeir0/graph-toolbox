@@ -1,20 +1,30 @@
+from collections import deque
 from typing import Dict, List, Optional, Set, Tuple, Hashable
 
 
 class Graph:
     def __init__(self, directed: bool = False) -> None:
         self.adj_list: Dict[Hashable, Dict[Hashable, float]] = {}
+        self.in_degrees: Dict[Hashable, int] = {}
         self.directed: bool = directed
 
     def add_edge(self, u: Hashable, v: Hashable, weight: float = 1.0) -> None:
         if u not in self.adj_list:
             self.adj_list[u] = {}
+            self.in_degrees[u] = 0
         if v not in self.adj_list:
             self.adj_list[v] = {}
+            self.in_degrees[v] = 0
 
+        is_new_edge = v not in self.adj_list[u]
         self.adj_list[u][v] = float(weight)
+
+        if is_new_edge:
+            self.in_degrees[v] += 1
         if not self.directed:
             self.adj_list[v][u] = float(weight)
+            if is_new_edge:
+                self.in_degrees[u] += 1
 
     def get_nodes(self) -> List[Hashable]:
         return list(self.adj_list.keys())
@@ -27,49 +37,124 @@ class Graph:
 
     def total_weight(self) -> float:
         total: float = 0.0
-        seen_edges: Set[Tuple[str, str]] = set()
 
+        if self.directed:
+            for u in self.adj_list:
+                total += sum(self.adj_list[u].values())
+            return total
+
+        seen_edges: Set[frozenset] = set()
+        
         for u in self.adj_list:
             for v, weight in self.adj_list[u].items():
-                edge = tuple(sorted((str(u), str(v))))
+                edge = frozenset([u, v])
                 if edge not in seen_edges:
                     total += weight
                     seen_edges.add(edge)
+                    
         return total
 
-    def is_connected(self) -> bool:
+    def is_connected(self, connection_type: str = "strong") -> bool:
         nodes = self.get_nodes()
         if not nodes:
             return True
 
-        visited: Set[Hashable] = set()
+        if not self.directed:
+            return len(self.bfs(nodes[0])) == len(nodes)
+
+        if connection_type == "strong":
+            return self._is_strongly_connected(nodes)
+        elif connection_type == "weak":
+            return self._is_weakly_connected(nodes)
+        else:
+            raise ValueError("connection_type deve ser 'strong' ou 'weak'.")
+
+    def _is_strongly_connected(self, nodes: List[Hashable]) -> bool:
         start_node = nodes[0]
 
-        stack: List[Hashable] = [start_node]
+        if len(self.bfs(start_node)) != len(nodes):
+            return False
 
-        while stack:
-            current = stack.pop()
-            if current not in visited:
-                visited.add(current)
-                for neighbor in self.get_neighbors(current):
-                    if neighbor not in visited:
-                        stack.append(neighbor)
+        reversed_adj_list: Dict[Hashable, List[Hashable]] = {node: [] for node in nodes}
+        for u in self.adj_list:
+            for v in self.adj_list[u]:
+                reversed_adj_list[v].append(u)
+
+        visited: Set[Hashable] = {start_node}
+        queue: deque = deque([start_node])
+        while queue:
+            current = queue.popleft()
+            for neighbor in reversed_adj_list[current]:
+                if neighbor not in visited:
+                    visited.add(neighbor)
+                    queue.append(neighbor)
+
+        return len(visited) == len(nodes)
+
+    def _is_weakly_connected(self, nodes: List[Hashable]) -> bool:
+        undirected_adj: Dict[Hashable, Set[Hashable]] = {node: set() for node in nodes}
+        for u in self.adj_list:
+            for v in self.adj_list[u]:
+                undirected_adj[u].add(v)
+                undirected_adj[v].add(u)
+
+        visited: Set[Hashable] = {nodes[0]}
+        queue: deque = deque([nodes[0]])
+        while queue:
+            current = queue.popleft()
+            for neighbor in undirected_adj[current]:
+                if neighbor not in visited:
+                    visited.add(neighbor)
+                    queue.append(neighbor)
 
         return len(visited) == len(nodes)
 
     def get_out_degree(self, node: Hashable) -> int:
-        if node not in self.adj_list:
-            return 0
-        return len(self.adj_list[node])
+        return len(self.adj_list.get(node, {}))
 
     def get_in_degree(self, node: Hashable) -> int:
-        in_degree = 0
-        for u in self.adj_list:
-            if node in self.adj_list[u]:
-                in_degree += 1
-        return in_degree
+        return self.in_degrees.get(node, 0)
 
     def get_degree(self, node: Hashable) -> int:
         if not self.directed:
             return self.get_out_degree(node)
         return self.get_in_degree(node) + self.get_out_degree(node)
+
+    def bfs(self, start_node: Hashable) -> List[Hashable]:
+        if start_node not in self.adj_list:
+            return []
+
+        visited: Set[Hashable] = {start_node}
+        queue: deque = deque([start_node])
+        traversal_order: List[Hashable] = []
+
+        while queue:
+            current = queue.popleft()
+            traversal_order.append(current)
+
+            for neighbor in self.get_neighbors(current):
+                if neighbor not in visited:
+                    visited.add(neighbor)
+                    queue.append(neighbor)
+
+        return traversal_order
+
+    def dfs(self, start_node: Hashable) -> List[Hashable]:
+        if start_node not in self.adj_list:
+            return []
+
+        visited: Set[Hashable] = set()
+        stack: List[Hashable] = [start_node]
+        traversal_order: List[Hashable] = []
+
+        while stack:
+            current = stack.pop()
+            if current not in visited:
+                visited.add(current)
+                traversal_order.append(current)
+
+                for neighbor in reversed(self.get_neighbors(current)):
+                    if neighbor not in visited:
+                        stack.append(neighbor)
+
+        return traversal_order
