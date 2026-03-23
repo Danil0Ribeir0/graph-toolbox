@@ -1,7 +1,40 @@
+import pytest
 from src.models import Graph
-from src.algorithms import GraphTraversal
+from src.algorithms import PathFinder, SpanningTree
 from src.validator import EulerianValidator
 
+
+@pytest.fixture
+def empty_graph() -> Graph:
+    """Retorna um grafo vazio não direcionado."""
+    return Graph()
+
+@pytest.fixture
+def simple_weighted_graph() -> Graph:
+    """Retorna um grafo com pesos para testes de caminho mínimo."""
+    g = Graph()
+    g.add_edge("A", "B", 1.0)
+    g.add_edge("B", "C", 2.0)
+    g.add_edge("A", "C", 10.0)
+    return g
+
+@pytest.fixture
+def disconnected_graph() -> Graph:
+    """Retorna um grafo desconexo (duas ilhas)."""
+    g = Graph()
+    g.add_edge(1, 2)
+    g.add_edge(3, 4)
+    return g
+
+@pytest.fixture
+def cycle_graph() -> Graph:
+    """Retorna um grafo que forma um ciclo perfeito (graus pares)."""
+    g = Graph()
+    g.add_edge("A", "B")
+    g.add_edge("B", "C")
+    g.add_edge("C", "D")
+    g.add_edge("D", "A")
+    return g
 
 class TestGraphModels:
     def test_add_edge_creates_undirected_connection(self):
