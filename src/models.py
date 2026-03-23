@@ -1,3 +1,4 @@
+from collections import deque
 from typing import Dict, List, Optional, Set, Tuple, Hashable
 
 
@@ -42,20 +43,8 @@ class Graph:
         if not nodes:
             return True
 
-        visited: Set[Hashable] = set()
-        start_node = nodes[0]
-
-        stack: List[Hashable] = [start_node]
-
-        while stack:
-            current = stack.pop()
-            if current not in visited:
-                visited.add(current)
-                for neighbor in self.get_neighbors(current):
-                    if neighbor not in visited:
-                        stack.append(neighbor)
-
-        return len(visited) == len(nodes)
+        visited_nodes = self.bfs(nodes[0])
+        return len(visited_nodes) == len(nodes)
 
     def get_out_degree(self, node: Hashable) -> int:
         if node not in self.adj_list:
@@ -73,3 +62,42 @@ class Graph:
         if not self.directed:
             return self.get_out_degree(node)
         return self.get_in_degree(node) + self.get_out_degree(node)
+
+    def bfs(self, start_node: Hashable) -> List[Hashable]:
+        if start_node not in self.adj_list:
+            return []
+
+        visited: Set[Hashable] = {start_node}
+        queue: deque = deque([start_node])
+        traversal_order: List[Hashable] = []
+
+        while queue:
+            current = queue.popleft()
+            traversal_order.append(current)
+
+            for neighbor in self.get_neighbors(current):
+                if neighbor not in visited:
+                    visited.add(neighbor)
+                    queue.append(neighbor)
+
+        return traversal_order
+
+    def dfs(self, start_node: Hashable) -> List[Hashable]:
+        if start_node not in self.adj_list:
+            return []
+
+        visited: Set[Hashable] = set()
+        stack: List[Hashable] = [start_node]
+        traversal_order: List[Hashable] = []
+
+        while stack:
+            current = stack.pop()
+            if current not in visited:
+                visited.add(current)
+                traversal_order.append(current)
+
+                for neighbor in reversed(self.get_neighbors(current)):
+                    if neighbor not in visited:
+                        stack.append(neighbor)
+
+        return traversal_order
