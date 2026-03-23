@@ -5,17 +5,26 @@ from typing import Dict, List, Optional, Set, Tuple, Hashable
 class Graph:
     def __init__(self, directed: bool = False) -> None:
         self.adj_list: Dict[Hashable, Dict[Hashable, float]] = {}
+        self.in_degrees: Dict[Hashable, int] = {}
         self.directed: bool = directed
 
     def add_edge(self, u: Hashable, v: Hashable, weight: float = 1.0) -> None:
         if u not in self.adj_list:
             self.adj_list[u] = {}
+            self.in_degrees[u] = 0
         if v not in self.adj_list:
             self.adj_list[v] = {}
+            self.in_degrees[v] = 0
 
+        is_new_edge = v not in self.adj_list[u]
         self.adj_list[u][v] = float(weight)
+        
+        if is_new_edge:
+            self.in_degrees[v] += 1
         if not self.directed:
             self.adj_list[v][u] = float(weight)
+            if is_new_edge:
+                self.in_degrees[u] += 1
 
     def get_nodes(self) -> List[Hashable]:
         return list(self.adj_list.keys())
@@ -47,16 +56,10 @@ class Graph:
         return len(visited_nodes) == len(nodes)
 
     def get_out_degree(self, node: Hashable) -> int:
-        if node not in self.adj_list:
-            return 0
-        return len(self.adj_list[node])
+        return len(self.adj_list.get(node, {}))
 
     def get_in_degree(self, node: Hashable) -> int:
-        in_degree = 0
-        for u in self.adj_list:
-            if node in self.adj_list[u]:
-                in_degree += 1
-        return in_degree
+        return self.in_degrees.get(node, 0)
 
     def get_degree(self, node: Hashable) -> int:
         if not self.directed:
