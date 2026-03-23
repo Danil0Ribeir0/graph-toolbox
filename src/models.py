@@ -35,3 +35,23 @@ class Graph:
                     total += weight
                     seen_edges.add(edge)
         return total
+
+    def is_connected(self) -> bool:
+        nodes = self.get_nodes()
+        if not nodes:
+            return True
+
+        visited: Set[Hashable] = set()
+        start_node = nodes[0]
+        
+        stack: List[Hashable] = [start_node]
+
+        while stack:
+            current = stack.pop()
+            if current not in visited:
+                visited.add(current)
+                for neighbor in self.get_neighbors(current):
+                    if neighbor not in visited:
+                        stack.append(neighbor)
+
+        return len(visited) == len(nodes)
