@@ -56,3 +56,20 @@ class Graph:
                         stack.append(neighbor)
 
         return len(visited) == len(nodes)
+
+    def get_out_degree(self, node: Hashable) -> int:
+        if node not in self.adj_list:
+            return 0
+        return len(self.adj_list[node])
+
+    def get_in_degree(self, node: Hashable) -> int:
+        in_degree = 0
+        for u in self.adj_list:
+            if node in self.adj_list[u]:
+                in_degree += 1
+        return in_degree
+
+    def get_degree(self, node: Hashable) -> int:
+        if not self.directed:
+            return self.get_out_degree(node)
+        return self.get_in_degree(node) + self.get_out_degree(node)
