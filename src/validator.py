@@ -8,6 +8,6 @@ class EulerianValidator:
             return False
 
         for node in graph.get_nodes():
-            if len(graph.get_neighbors(node)) % 2 != 0:
+            if graph.get_degree(node) % 2 != 0:
                 return False
         return True

@@ -40,6 +40,12 @@ def cycle_graph() -> Graph:
     return g
 
 
+@pytest.fixture
+def empty_directed_graph() -> Graph:
+    """Retorna um grafo vazio direcionado."""
+    return Graph(directed=True)
+
+
 class TestGraphModels:
     def test_add_edge_creates_undirected_connection(self, empty_graph):
         empty_graph.add_edge("A", "B")
@@ -60,6 +66,25 @@ class TestGraphModels:
         self, disconnected_graph
     ):
         assert disconnected_graph.is_connected() is False
+
+    def test_degrees_undirected_graph(self, empty_graph):
+        empty_graph.add_edge("A", "B")
+        empty_graph.add_edge("A", "C")
+
+        assert empty_graph.get_degree("A") == 2
+        assert empty_graph.get_in_degree("A") == 2
+        assert empty_graph.get_out_degree("A") == 2
+
+    def test_degrees_directed_graph(self, empty_directed_graph):
+        empty_directed_graph.add_edge("A", "B")  # A -> B
+        empty_directed_graph.add_edge("C", "A")  # C -> A
+
+        assert empty_directed_graph.get_in_degree("A") == 1
+        assert empty_directed_graph.get_out_degree("A") == 1
+        assert empty_directed_graph.get_degree("A") == 2
+
+        assert empty_directed_graph.get_in_degree("B") == 1
+        assert empty_directed_graph.get_out_degree("B") == 0
 
 
 class TestGraphAlgorithms:
