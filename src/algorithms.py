@@ -2,10 +2,13 @@ import heapq
 from typing import Dict, Optional, Tuple, Hashable, List, Set
 from src.models import Graph
 
+
 class PathFinder:
     @staticmethod
     def dijkstra(graph: Graph, start_node: Hashable) -> Dict[Hashable, float]:
-        distances: Dict[Hashable, float] = {node: float("inf") for node in graph.get_nodes()}
+        distances: Dict[Hashable, float] = {
+            node: float("inf") for node in graph.get_nodes()
+        }
         distances[start_node] = 0.0
 
         priority_queue: List[Tuple[float, Hashable]] = [(0.0, start_node)]
@@ -34,7 +37,9 @@ class SpanningTree:
         g = Graph()
         visited: Set[Hashable] = set()
 
-        priority_queue: List[Tuple[float, Optional[Hashable], Hashable]] = [(0.0, None, start_node)]
+        priority_queue: List[Tuple[float, Optional[Hashable], Hashable]] = [
+            (0.0, None, start_node)
+        ]
 
         while priority_queue and len(visited) < len(graph.get_nodes()):
             weight, u, v = heapq.heappop(priority_queue)

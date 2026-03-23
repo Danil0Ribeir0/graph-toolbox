@@ -1,7 +1,8 @@
 from typing import Dict, List, Optional, Set, Tuple, Hashable
 
+
 class Graph:
-    def __init__(self, directed: bool=False) -> None:
+    def __init__(self, directed: bool = False) -> None:
         self.adj_list: Dict[Hashable, Dict[Hashable, float]] = {}
         self.directed: bool = directed
 
@@ -27,7 +28,7 @@ class Graph:
     def total_weight(self) -> float:
         total: float = 0.0
         seen_edges: Set[Tuple[str, str]] = set()
-        
+
         for u in self.adj_list:
             for v, weight in self.adj_list[u].items():
                 edge = tuple(sorted((str(u), str(v))))
@@ -43,7 +44,7 @@ class Graph:
 
         visited: Set[Hashable] = set()
         start_node = nodes[0]
-        
+
         stack: List[Hashable] = [start_node]
 
         while stack:
