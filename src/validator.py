@@ -1,10 +1,10 @@
-from .algorithms import GraphTraversal
+from src.models import Graph
 
 
 class EulerianValidator:
     @staticmethod
-    def has_cycle(graph):
-        if not GraphTraversal.is_connected(graph):
+    def has_cycle(graph: Graph) -> bool:
+        if not graph.is_connected():
             return False
 
         for node in graph.get_nodes():
