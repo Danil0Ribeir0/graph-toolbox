@@ -34,6 +34,9 @@ class PathFinder:
 class SpanningTree:
     @staticmethod
     def prim(graph: Graph, start_node: Hashable) -> Graph:
+        if graph.directed:
+            raise ValueError("O Algoritmo de Prim suporta apenas grafos não direcionados.")
+        
         g = Graph()
         visited: Set[Hashable] = set()
 

@@ -120,6 +120,14 @@ class TestGraphAlgorithms:
 
         assert mst.total_weight() == 6.0
         assert len(mst.get_nodes()) == 3
+    
+    def test_prim_raises_error_for_directed_graph(self, empty_directed_graph):
+        """Garante que o Algoritmo de Prim rejeita grafos direcionados."""
+        empty_directed_graph.add_edge("A", "B", 1.0)
+        empty_directed_graph.add_edge("B", "C", 2.0)
+        
+        with pytest.raises(ValueError, match="não direcionados"):
+            SpanningTree.prim(empty_directed_graph, "A")
 
 
 class TestEulerianValidator:
