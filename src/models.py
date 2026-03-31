@@ -193,20 +193,20 @@ class Graph:
             return []
 
         visited: Set[Hashable] = set()
+        result: List[Hashable] = []
         stack: List[Hashable] = [start_node]
-        traversal_order: List[Hashable] = []
 
         while stack:
             current = stack.pop()
             if current not in visited:
                 visited.add(current)
-                traversal_order.append(current)
+                result.append(current)
 
-                for neighbor in reversed(self.get_neighbors(current)):
+                for neighbor in self.get_neighbors(current):
                     if neighbor not in visited:
                         stack.append(neighbor)
 
-        return traversal_order
+        return result
 
     def to_dict(self) -> dict:
         return {
