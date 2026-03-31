@@ -110,6 +110,12 @@ class TestGraphAlgorithms:
         distancias = PathFinder.dijkstra(simple_weighted_graph, "A")
         assert distancias["C"] == 3.0
 
+    def test_dijkstra_raises_error_for_negative_weights(self, simple_weighted_graph):
+        simple_weighted_graph.add_edge("C", "D", -5.0)
+        
+        with pytest.raises(ValueError, match="pesos negativos"):
+            PathFinder.dijkstra(simple_weighted_graph, "A")
+
     def test_prim_mst_total_weight(self):
         g = Graph()
         g.add_edge("A", "B", 1.0)

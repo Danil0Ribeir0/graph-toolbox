@@ -6,6 +6,9 @@ from src.models import Graph
 class PathFinder:
     @staticmethod
     def dijkstra(graph: Graph, start_node: Hashable) -> Dict[Hashable, float]:
+        if start_node not in graph.get_nodes():
+            return {}
+        
         distances: Dict[Hashable, float] = {
             node: float("inf") for node in graph.get_nodes()
         }
@@ -22,6 +25,9 @@ class PathFinder:
             for v in graph.get_neighbors(u):
                 weight = graph.get_weight(u, v)
                 if weight is not None:
+                    if weight < 0:
+                        raise ValueError(f"O Algoritmo de Dijkstra não suporta arestas com pesos negativos (Aresta {u}->{v} tem peso {weight}).")
+                    
                     distance = current_distance + weight
 
                     if distance < distances[v]:
