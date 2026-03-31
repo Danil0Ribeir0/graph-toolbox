@@ -51,6 +51,49 @@ class TestGraphModels:
         empty_graph.add_edge("A", "B")
         assert "B" in empty_graph.get_neighbors("A")
         assert "A" in empty_graph.get_neighbors("B")
+    
+    def test_add_edge_warns_on_overwrite(self, empty_graph):
+        import warnings
+
+        empty_graph.add_edge("A", "B", 5.0)
+        
+        with pytest.warns(UserWarning, match="já existe. O peso foi sobrescrito"):
+            empty_graph.add_edge("A", "B", 10.0)
+            
+        assert empty_graph.get_weight("A", "B") == 10.0
+    
+    def test_add_edge_raises_error_for_invalid_nodes(self, empty_graph):
+        with pytest.raises(ValueError, match="não podem ser nulos"):
+            empty_graph.add_edge(None, "B")
+            
+        with pytest.raises(ValueError, match="não podem ser strings vazias"):
+            empty_graph.add_edge("A", "")
+
+    def test_add_edge_raises_error_for_invalid_weight(self, empty_graph):
+        with pytest.raises(ValueError, match="tem de ser um número válido"):
+            # Tentar passar uma string arbitrária como peso
+            empty_graph.add_edge("A", "B", "peso_invalido")
+    
+    def test_remove_edge_updates_in_degrees_and_cache(self, simple_weighted_graph):
+        assert simple_weighted_graph.get_degree("B") == 2
+        
+        simple_weighted_graph.is_connected()
+        assert len(simple_weighted_graph._connection_cache) > 0
+        
+        simple_weighted_graph.remove_edge("A", "B")
+        
+        assert "B" not in simple_weighted_graph.get_neighbors("A")
+        assert "A" not in simple_weighted_graph.get_neighbors("B")
+        
+        assert simple_weighted_graph.get_degree("B") == 1
+        
+        assert len(simple_weighted_graph._connection_cache) == 0
+
+    def test_remove_edge_raises_error_if_not_exists(self, empty_graph):
+        empty_graph.add_edge("A", "B")
+        
+        with pytest.raises(KeyError, match="não existe no grafo"):
+            empty_graph.remove_edge("A", "C")
 
     def test_get_nodes_returns_all_unique_nodes(self, empty_graph):
         empty_graph.add_edge(1, 2)
@@ -59,13 +102,27 @@ class TestGraphModels:
         assert len(nodes) == 3
         assert set(nodes) == {1, 2, 3}
 
+    def test_empty_graph_is_not_connected(self, empty_graph):
+        assert empty_graph.is_connected() is False
+
     def test_is_connected_returns_true_for_connected_graph(self, simple_weighted_graph):
         assert simple_weighted_graph.is_connected() is True
 
-    def test_is_connected_returns_false_for_disconnected_graph(
-        self, disconnected_graph
-    ):
+    def test_is_connected_returns_false_for_disconnected_graph(self, disconnected_graph):
         assert disconnected_graph.is_connected() is False
+    
+    def test_is_connected_uses_lazy_caching(self, empty_graph):
+        empty_graph.add_edge("A", "B")
+        
+        assert empty_graph.is_connected() is True
+        assert "strong" in empty_graph._connection_cache
+        assert empty_graph._connection_cache["strong"] is True
+        
+        empty_graph.add_edge("C", "D")
+        assert len(empty_graph._connection_cache) == 0
+        
+        assert empty_graph.is_connected() is False
+        assert empty_graph._connection_cache["strong"] is False
 
     def test_degrees_undirected_graph(self, empty_graph):
         empty_graph.add_edge("A", "B")
@@ -97,6 +154,17 @@ class TestGraphModels:
         empty_directed_graph.add_edge("B", "C")
         assert empty_directed_graph.is_connected(connection_type="strong") is False
 
+    def test_kosaraju_strongly_connected_components(self, empty_directed_graph):
+        empty_directed_graph.add_edge("A", "B")
+        empty_directed_graph.add_edge("B", "C")
+        empty_directed_graph.add_edge("C", "A")
+        
+        empty_directed_graph.add_edge("C", "D")
+        
+        sccs = empty_directed_graph.strongly_connected_components()
+        
+        assert len(sccs) == 2
+
     def test_directed_graph_weak_connectivity(self, empty_directed_graph):
         empty_directed_graph.add_edge("A", "B")
         empty_directed_graph.add_edge("C", "B")
@@ -107,8 +175,32 @@ class TestGraphModels:
 
 class TestGraphAlgorithms:
     def test_dijkstra_shortest_path(self, simple_weighted_graph):
-        distancias = PathFinder.dijkstra(simple_weighted_graph, "A")
+        distancias, caminhos = PathFinder.dijkstra(simple_weighted_graph, "A")
+        
         assert distancias["C"] == 3.0
+        assert caminhos["C"] == ["A", "B", "C"]
+
+    def test_dijkstra_raises_error_for_negative_weights(self, simple_weighted_graph):
+        simple_weighted_graph.add_edge("C", "D", -5.0)
+        
+        with pytest.raises(ValueError, match="pesos negativos"):
+            PathFinder.dijkstra(simple_weighted_graph, "A")
+    
+    def test_dijkstra_filters_unreachable_nodes(self, empty_graph):
+        empty_graph.add_edge("A", "B", 2.0)
+        empty_graph.add_edge("C", "D", 1.0) 
+        
+        distances, paths = PathFinder.dijkstra(empty_graph, "A")
+        
+        assert "B" in distances
+        assert distances["B"] == 2.0
+        assert "C" not in distances
+
+    def test_dijkstra_raises_error_for_nonexistent_start_node(self, empty_graph):
+        empty_graph.add_edge("A", "B", 1.0)
+        
+        with pytest.raises(ValueError, match="não existe no grafo"):
+            PathFinder.dijkstra(empty_graph, "Z")
 
     def test_prim_mst_total_weight(self):
         g = Graph()
@@ -120,6 +212,13 @@ class TestGraphAlgorithms:
 
         assert mst.total_weight() == 6.0
         assert len(mst.get_nodes()) == 3
+    
+    def test_prim_raises_error_for_directed_graph(self, empty_directed_graph):
+        empty_directed_graph.add_edge("A", "B", 1.0)
+        empty_directed_graph.add_edge("B", "C", 2.0)
+        
+        with pytest.raises(ValueError, match="não direcionados"):
+            SpanningTree.prim(empty_directed_graph, "A")
 
 
 class TestEulerianValidator:
@@ -180,3 +279,18 @@ class TestGraphSerialization:
         assert loaded_graph.directed == simple_weighted_graph.directed
         assert loaded_graph.get_weight("A", "C") == 10.0
         assert loaded_graph.get_degree("B") == 2
+    
+    def test_from_dict_raises_error_for_missing_directed_key(self):
+        invalid_data = {
+            "adj_list": {"A": {}}
+        }
+        with pytest.raises(ValueError, match="não contém a chave obrigatória 'directed'"):
+            Graph.from_dict(invalid_data)
+
+    def test_from_dict_raises_error_for_invalid_directed_type(self):
+        invalid_data = {
+            "directed": "True",  # Uma string em vez de um booleano
+            "adj_list": {"A": {}}
+        }
+        with pytest.raises(TypeError, match="deve ser um booleano"):
+            Graph.from_dict(invalid_data)
