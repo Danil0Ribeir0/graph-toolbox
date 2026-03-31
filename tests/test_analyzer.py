@@ -62,6 +62,18 @@ class TestGraphModels:
             
         assert empty_graph.get_weight("A", "B") == 10.0
     
+    def test_add_edge_raises_error_for_invalid_nodes(self, empty_graph):
+        with pytest.raises(ValueError, match="não podem ser nulos"):
+            empty_graph.add_edge(None, "B")
+            
+        with pytest.raises(ValueError, match="não podem ser strings vazias"):
+            empty_graph.add_edge("A", "")
+
+    def test_add_edge_raises_error_for_invalid_weight(self, empty_graph):
+        with pytest.raises(ValueError, match="tem de ser um número válido"):
+            # Tentar passar uma string arbitrária como peso
+            empty_graph.add_edge("A", "B", "peso_invalido")
+    
     def test_remove_edge_updates_in_degrees_and_cache(self, simple_weighted_graph):
         assert simple_weighted_graph.get_degree("B") == 2
         

@@ -12,6 +12,16 @@ class Graph:
         self._connection_cache: Dict[str, bool] = {}
 
     def add_edge(self, u: Hashable, v: Hashable, weight: float = 1.0) -> None:
+        if u is None or v is None:
+            raise ValueError("Os nós do grafo não podem ser nulos (None).")
+        if u == "" or v == "":
+            raise ValueError("Os nós do grafo não podem ser strings vazias.")
+            
+        try:
+            weight_float = float(weight)
+        except (TypeError, ValueError):
+            raise ValueError(f"O peso da aresta tem de ser um número válido. Recebido: {weight}")
+
         if u not in self.adj_list:
             self.adj_list[u] = {}
             self.in_degrees[u] = 0
@@ -23,20 +33,20 @@ class Graph:
         
         if not is_new_edge:
             warnings.warn(
-                f"A aresta {u}->{v} já existe. O peso foi sobrescrito para {weight}.",
+                f"A aresta {u}->{v} já existe. O peso foi sobrescrito para {weight_float}.",
                 UserWarning
             )
 
-        self.adj_list[u][v] = float(weight)
+        self.adj_list[u][v] = weight_float
         
         if is_new_edge:
             self.in_degrees[v] += 1
 
         if not self.directed:
-            self.adj_list[v][u] = float(weight)
+            self.adj_list[v][u] = weight_float
             if is_new_edge:
                 self.in_degrees[u] += 1
-        
+                
         self._connection_cache.clear()
     
     def remove_edge(self, u: Hashable, v: Hashable) -> None:
