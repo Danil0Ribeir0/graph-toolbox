@@ -126,6 +126,23 @@ class TestGraphAlgorithms:
         
         with pytest.raises(ValueError, match="pesos negativos"):
             PathFinder.dijkstra(simple_weighted_graph, "A")
+    
+    def test_dijkstra_filters_unreachable_nodes(self, empty_graph):
+        empty_graph.add_edge("A", "B", 2.0)
+        empty_graph.add_edge("C", "D", 1.0) 
+        
+        distances = PathFinder.dijkstra(empty_graph, "A")
+        
+        assert "B" in distances
+        assert distances["B"] == 2.0
+        assert "C" not in distances
+        assert "D" not in distances
+
+    def test_dijkstra_raises_error_for_nonexistent_start_node(self, empty_graph):
+        empty_graph.add_edge("A", "B", 1.0)
+        
+        with pytest.raises(ValueError, match="não existe no grafo"):
+            PathFinder.dijkstra(empty_graph, "Z")
 
     def test_prim_mst_total_weight(self):
         g = Graph()

@@ -7,7 +7,7 @@ class PathFinder:
     @staticmethod
     def dijkstra(graph: Graph, start_node: Hashable) -> Dict[Hashable, float]:
         if start_node not in graph.get_nodes():
-            return {}
+            raise ValueError(f"O nó de partida '{start_node}' não existe no grafo.")
         
         distances: Dict[Hashable, float] = {
             node: float("inf") for node in graph.get_nodes()
@@ -34,7 +34,7 @@ class PathFinder:
                         distances[v] = distance
                         heapq.heappush(priority_queue, (distance, v))
 
-        return distances
+        return {node: dist for node, dist in distances.items() if dist != float("inf")}
 
 
 class SpanningTree:
