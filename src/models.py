@@ -189,7 +189,8 @@ class Graph:
 
         for u, neighbors in adj_list.items():
             for v, weight in neighbors.items():
-                g.add_edge(u, v, weight)
+                if v not in g.adj_list[u]:
+                    g.add_edge(u, v, weight)
                 
         return g
     
