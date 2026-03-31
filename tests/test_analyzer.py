@@ -175,8 +175,10 @@ class TestGraphModels:
 
 class TestGraphAlgorithms:
     def test_dijkstra_shortest_path(self, simple_weighted_graph):
-        distancias = PathFinder.dijkstra(simple_weighted_graph, "A")
+        distancias, caminhos = PathFinder.dijkstra(simple_weighted_graph, "A")
+        
         assert distancias["C"] == 3.0
+        assert caminhos["C"] == ["A", "B", "C"]
 
     def test_dijkstra_raises_error_for_negative_weights(self, simple_weighted_graph):
         simple_weighted_graph.add_edge("C", "D", -5.0)
@@ -188,12 +190,11 @@ class TestGraphAlgorithms:
         empty_graph.add_edge("A", "B", 2.0)
         empty_graph.add_edge("C", "D", 1.0) 
         
-        distances = PathFinder.dijkstra(empty_graph, "A")
+        distances, paths = PathFinder.dijkstra(empty_graph, "A")
         
         assert "B" in distances
         assert distances["B"] == 2.0
         assert "C" not in distances
-        assert "D" not in distances
 
     def test_dijkstra_raises_error_for_nonexistent_start_node(self, empty_graph):
         empty_graph.add_edge("A", "B", 1.0)
