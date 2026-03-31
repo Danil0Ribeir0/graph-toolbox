@@ -80,27 +80,56 @@ class Graph:
         else:
             raise ValueError("connection_type deve ser 'strong' ou 'weak'.")
 
-    def _is_strongly_connected(self, nodes: List[Hashable]) -> bool:
-        start_node = nodes[0]
+    def strongly_connected_components(self) -> List[List[Hashable]]:
+        nodes = self.get_nodes()
+        if not nodes:
+            return []
 
-        if len(self.bfs(start_node)) != len(nodes):
-            return False
+        visited: Set[Hashable] = set()
+        finish_order: List[Hashable] = []
 
-        reversed_adj_list: Dict[Hashable, List[Hashable]] = {node: [] for node in nodes}
+        for node in nodes:
+            if node not in visited:
+                stack = [(node, False)]
+                while stack:
+                    current, visited_neighbors = stack.pop()
+                    if visited_neighbors:
+                        finish_order.append(current)
+                    else:
+                        if current not in visited:
+                            visited.add(current)
+                            stack.append((current, True))
+                            for neighbor in self.get_neighbors(current):
+                                if neighbor not in visited:
+                                    stack.append((neighbor, False))
+
+        reversed_adj: Dict[Hashable, List[Hashable]] = {n: [] for n in nodes}
         for u in self.adj_list:
             for v in self.adj_list[u]:
-                reversed_adj_list[v].append(u)
+                reversed_adj[v].append(u)
 
-        visited: Set[Hashable] = {start_node}
-        queue: deque = deque([start_node])
-        while queue:
-            current = queue.popleft()
-            for neighbor in reversed_adj_list[current]:
-                if neighbor not in visited:
-                    visited.add(neighbor)
-                    queue.append(neighbor)
+        sccs: List[List[Hashable]] = []
+        visited_reversed: Set[Hashable] = set()
 
-        return len(visited) == len(nodes)
+        for node in reversed(finish_order):
+            if node not in visited_reversed:
+                component: List[Hashable] = []
+                stack_rev = [node]
+                while stack_rev:
+                    current = stack_rev.pop()
+                    if current not in visited_reversed:
+                        visited_reversed.add(current)
+                        component.append(current)
+                        for neighbor in reversed_adj[current]:
+                            if neighbor not in visited_reversed:
+                                stack_rev.append(neighbor)
+                sccs.append(component)
+
+        return sccs
+
+    def _is_strongly_connected(self, nodes: List[Hashable]) -> bool:
+        sccs = self.strongly_connected_components()
+        return len(sccs) == 1 if sccs else True
 
     def _is_weakly_connected(self, nodes: List[Hashable]) -> bool:
         visited: Set[Hashable] = {nodes[0]}

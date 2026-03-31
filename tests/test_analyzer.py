@@ -108,6 +108,17 @@ class TestGraphModels:
         empty_directed_graph.add_edge("B", "C")
         assert empty_directed_graph.is_connected(connection_type="strong") is False
 
+    def test_kosaraju_strongly_connected_components(self, empty_directed_graph):
+        empty_directed_graph.add_edge("A", "B")
+        empty_directed_graph.add_edge("B", "C")
+        empty_directed_graph.add_edge("C", "A")
+        
+        empty_directed_graph.add_edge("C", "D")
+        
+        sccs = empty_directed_graph.strongly_connected_components()
+        
+        assert len(sccs) == 2
+
     def test_directed_graph_weak_connectivity(self, empty_directed_graph):
         empty_directed_graph.add_edge("A", "B")
         empty_directed_graph.add_edge("C", "B")
