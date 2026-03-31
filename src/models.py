@@ -1,4 +1,5 @@
 import json
+import warnings
 from collections import deque
 from typing import Dict, List, Optional, Set, Tuple, Hashable
 
@@ -18,10 +19,18 @@ class Graph:
             self.in_degrees[v] = 0
 
         is_new_edge = v not in self.adj_list[u]
-        self.adj_list[u][v] = float(weight)
+        
+        if not is_new_edge:
+            warnings.warn(
+                f"A aresta {u}->{v} já existe. O peso foi sobrescrito para {weight}.",
+                UserWarning
+            )
 
+        self.adj_list[u][v] = float(weight)
+        
         if is_new_edge:
             self.in_degrees[v] += 1
+
         if not self.directed:
             self.adj_list[v][u] = float(weight)
             if is_new_edge:

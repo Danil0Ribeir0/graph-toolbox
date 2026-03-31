@@ -51,6 +51,16 @@ class TestGraphModels:
         empty_graph.add_edge("A", "B")
         assert "B" in empty_graph.get_neighbors("A")
         assert "A" in empty_graph.get_neighbors("B")
+    
+    def test_add_edge_warns_on_overwrite(self, empty_graph):
+        import warnings
+        
+        empty_graph.add_edge("A", "B", 5.0)
+        
+        with pytest.warns(UserWarning, match="já existe. O peso foi sobrescrito"):
+            empty_graph.add_edge("A", "B", 10.0)
+            
+        assert empty_graph.get_weight("A", "B") == 10.0
 
     def test_get_nodes_returns_all_unique_nodes(self, empty_graph):
         empty_graph.add_edge(1, 2)
@@ -62,9 +72,7 @@ class TestGraphModels:
     def test_is_connected_returns_true_for_connected_graph(self, simple_weighted_graph):
         assert simple_weighted_graph.is_connected() is True
 
-    def test_is_connected_returns_false_for_disconnected_graph(
-        self, disconnected_graph
-    ):
+    def test_is_connected_returns_false_for_disconnected_graph(self, disconnected_graph):
         assert disconnected_graph.is_connected() is False
 
     def test_degrees_undirected_graph(self, empty_graph):
