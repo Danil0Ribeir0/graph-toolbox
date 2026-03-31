@@ -169,16 +169,27 @@ class Graph:
     @classmethod
     def from_dict(cls, data: dict) -> 'Graph':
         directed = data.get("directed", False)
-        g = cls(directed = directed)
-
-        adj_list = data.get("adj_list", {})
-        for u, neighbors in adj_list.items():
-            if u not in g.adj_list:
-                g.adj_list[u] = {}
-                g.in_degrees[u] = 0
+        g = cls(directed=directed)
         
-        for v, weight in neighbors.items():
+        adj_list = data.get("adj_list", {})
+        
+        for node in adj_list:
+            if node not in g.adj_list:
+                g.adj_list[node] = {}
+                g.in_degrees[node] = 0
+
+        for u, neighbors in adj_list.items():
+            for v, weight in neighbors.items():
                 g.add_edge(u, v, weight)
                 
         return g
     
+    def save_to_json(self, filepath: str) -> None:
+        with open(filepath, 'w', encoding='utf-8') as f:
+            json.dump(self.to_dict(), f, indent=4)
+    
+    @classmethod
+    def load_from_json(cls, filepath: str) -> 'Graph':
+        with open(filepath, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        return cls.from_dict(data)
