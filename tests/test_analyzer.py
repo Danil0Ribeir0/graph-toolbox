@@ -124,12 +124,12 @@ class TestGraphAlgorithms:
 
 class TestEulerianValidator:
     def test_has_cycle_true_when_connected_and_even_degrees(self, cycle_graph):
-        assert EulerianValidator.has_cycle(cycle_graph) is True
+        assert EulerianValidator.has_eulerian_cycle(cycle_graph) is True
 
     def test_has_cycle_false_when_odd_degrees_exist(self, empty_graph):
         empty_graph.add_edge("A", "B")
         empty_graph.add_edge("B", "C")
-        assert EulerianValidator.has_cycle(empty_graph) is False
+        assert EulerianValidator.has_eulerian_cycle(empty_graph) is False
 
     def test_has_cycle_false_when_disconnected_even_with_even_degrees(self):
         g = Graph()
@@ -142,4 +142,4 @@ class TestEulerianValidator:
         g.add_edge(5, 6)
         g.add_edge(6, 4)
 
-        assert EulerianValidator.has_cycle(g) is False
+        assert EulerianValidator.has_eulerian_cycle(g) is False
