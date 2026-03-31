@@ -124,12 +124,12 @@ class TestGraphAlgorithms:
 
 class TestEulerianValidator:
     def test_has_cycle_true_when_connected_and_even_degrees(self, cycle_graph):
-        assert EulerianValidator.has_cycle(cycle_graph) is True
+        assert EulerianValidator.has_eulerian_cycle(cycle_graph) is True
 
     def test_has_cycle_false_when_odd_degrees_exist(self, empty_graph):
         empty_graph.add_edge("A", "B")
         empty_graph.add_edge("B", "C")
-        assert EulerianValidator.has_cycle(empty_graph) is False
+        assert EulerianValidator.has_eulerian_cycle(empty_graph) is False
 
     def test_has_cycle_false_when_disconnected_even_with_even_degrees(self):
         g = Graph()
@@ -142,4 +142,41 @@ class TestEulerianValidator:
         g.add_edge(5, 6)
         g.add_edge(6, 4)
 
-        assert EulerianValidator.has_cycle(g) is False
+        assert EulerianValidator.has_eulerian_cycle(g) is False
+
+
+class TestGraphSerialization:
+    def test_to_dict_format(self, simple_weighted_graph):
+        data = simple_weighted_graph.to_dict()
+
+        assert data["directed"] is False
+        assert "A" in data["adj_list"]
+        assert data["adj_list"]["A"]["B"] == 1.0
+    
+    def test_from_dict_reconstruction(self):
+        data = {
+            "directed": True,
+            "adj_list": {
+                "X": {"Y": 5.0},
+                "Y": {}
+            }
+        }
+        
+        g = Graph.from_dict(data)
+        
+        assert g.directed is True
+        assert g.get_weight("X", "Y") == 5.0
+        assert g.get_in_degree("Y") == 1
+        assert g.get_out_degree("X") == 1
+
+    def test_json_save_and_load(self, simple_weighted_graph, tmp_path):
+        filepath = tmp_path / "meu_grafo.json"
+        
+        simple_weighted_graph.save_to_json(filepath)
+        assert filepath.exists()
+        
+        loaded_graph = Graph.load_from_json(filepath)
+        
+        assert loaded_graph.directed == simple_weighted_graph.directed
+        assert loaded_graph.get_weight("A", "C") == 10.0
+        assert loaded_graph.get_degree("B") == 2

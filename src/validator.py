@@ -3,7 +3,7 @@ from src.models import Graph
 
 class EulerianValidator:
     @staticmethod
-    def has_cycle(graph: Graph) -> bool:
+    def has_eulerian_cycle(graph: Graph) -> bool:
         if not graph.is_connected():
             return False
 

@@ -1,3 +1,4 @@
+import json
 from collections import deque
 from typing import Dict, List, Optional, Set, Tuple, Hashable
 
@@ -44,14 +45,14 @@ class Graph:
             return total
 
         seen_edges: Set[frozenset] = set()
-        
+
         for u in self.adj_list:
             for v, weight in self.adj_list[u].items():
                 edge = frozenset([u, v])
                 if edge not in seen_edges:
                     total += weight
                     seen_edges.add(edge)
-                    
+
         return total
 
     def is_connected(self, connection_type: str = "strong") -> bool:
@@ -158,3 +159,37 @@ class Graph:
                         stack.append(neighbor)
 
         return traversal_order
+
+    def to_dict(self) -> dict:
+        return {
+            "directed": self.directed,
+            "adj_list": self.adj_list
+        }
+    
+    @classmethod
+    def from_dict(cls, data: dict) -> 'Graph':
+        directed = data.get("directed", False)
+        g = cls(directed=directed)
+        
+        adj_list = data.get("adj_list", {})
+        
+        for node in adj_list:
+            if node not in g.adj_list:
+                g.adj_list[node] = {}
+                g.in_degrees[node] = 0
+
+        for u, neighbors in adj_list.items():
+            for v, weight in neighbors.items():
+                g.add_edge(u, v, weight)
+                
+        return g
+    
+    def save_to_json(self, filepath: str) -> None:
+        with open(filepath, 'w', encoding='utf-8') as f:
+            json.dump(self.to_dict(), f, indent=4)
+    
+    @classmethod
+    def load_from_json(cls, filepath: str) -> 'Graph':
+        with open(filepath, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+        return cls.from_dict(data)
