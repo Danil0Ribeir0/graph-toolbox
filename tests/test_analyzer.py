@@ -77,6 +77,19 @@ class TestGraphModels:
 
     def test_is_connected_returns_false_for_disconnected_graph(self, disconnected_graph):
         assert disconnected_graph.is_connected() is False
+    
+    def test_is_connected_uses_lazy_caching(self, empty_graph):
+        empty_graph.add_edge("A", "B")
+        
+        assert empty_graph.is_connected() is True
+        assert "strong" in empty_graph._connection_cache
+        assert empty_graph._connection_cache["strong"] is True
+        
+        empty_graph.add_edge("C", "D")
+        assert len(empty_graph._connection_cache) == 0
+        
+        assert empty_graph.is_connected() is False
+        assert empty_graph._connection_cache["strong"] is False
 
     def test_degrees_undirected_graph(self, empty_graph):
         empty_graph.add_edge("A", "B")

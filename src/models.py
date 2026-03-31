@@ -9,6 +9,7 @@ class Graph:
         self.adj_list: Dict[Hashable, Dict[Hashable, float]] = {}
         self.in_degrees: Dict[Hashable, int] = {}
         self.directed: bool = directed
+        self._connection_cache: Dict[str, bool] = {}
 
     def add_edge(self, u: Hashable, v: Hashable, weight: float = 1.0) -> None:
         if u not in self.adj_list:
@@ -35,6 +36,8 @@ class Graph:
             self.adj_list[v][u] = float(weight)
             if is_new_edge:
                 self.in_degrees[u] += 1
+        
+        self._connection_cache.clear()
 
     def get_nodes(self) -> List[Hashable]:
         return list(self.adj_list.keys())
@@ -66,19 +69,24 @@ class Graph:
         return total
 
     def is_connected(self, connection_type: str = "strong") -> bool:
+        if connection_type in self._connection_cache:
+            return self._connection_cache[connection_type]
+        
         nodes = self.get_nodes()
         if not nodes:
             return False
 
         if not self.directed:
-            return len(self.bfs(nodes[0])) == len(nodes)
-
-        if connection_type == "strong":
-            return self._is_strongly_connected(nodes)
+            result = len(self.bfs(nodes[0])) == len(nodes)
+        elif connection_type == "strong":
+            result = self._is_strongly_connected(nodes)
         elif connection_type == "weak":
-            return self._is_weakly_connected(nodes)
+            result = self._is_weakly_connected(nodes)
         else:
             raise ValueError("connection_type deve ser 'strong' ou 'weak'.")
+
+        self._connection_cache[connection_type] = result
+        return result
 
     def strongly_connected_components(self) -> List[List[Hashable]]:
         nodes = self.get_nodes()
