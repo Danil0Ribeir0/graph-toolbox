@@ -1,7 +1,7 @@
 import json
 import warnings
 from collections import deque
-from typing import Dict, List, Optional, Set, Tuple, Hashable
+from typing import Dict, List, Optional, Set, Tuple, Hashable, Iterable
 
 
 class Graph:
@@ -66,9 +66,9 @@ class Graph:
     def get_nodes(self) -> List[Hashable]:
         return list(self.adj_list.keys())
 
-    def get_neighbors(self, node: Hashable) -> List[Hashable]:
-        return list(self.adj_list.get(node, {}).keys())
-
+    def get_neighbors(self, node: Hashable) -> Iterable[Hashable]:
+        return self.adj_list.get(node, {}).keys()
+    
     def get_weight(self, u: Hashable, v: Hashable) -> Optional[float]:
         return self.adj_list.get(u, {}).get(v)
 
