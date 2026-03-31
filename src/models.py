@@ -38,6 +38,20 @@ class Graph:
                 self.in_degrees[u] += 1
         
         self._connection_cache.clear()
+    
+    def remove_edge(self, u: Hashable, v: Hashable) -> None:
+        if u not in self.adj_list or v not in self.adj_list[u]:
+            raise KeyError(f"A aresta {u}->{v} não existe no grafo.")
+
+        del self.adj_list[u][v]
+        self.in_degrees[v] -= 1
+
+        if not self.directed:
+            if v in self.adj_list and u in self.adj_list[v]:
+                del self.adj_list[v][u]
+                self.in_degrees[u] -= 1
+
+        self._connection_cache.clear()
 
     def get_nodes(self) -> List[Hashable]:
         return list(self.adj_list.keys())

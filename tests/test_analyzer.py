@@ -61,6 +61,27 @@ class TestGraphModels:
             empty_graph.add_edge("A", "B", 10.0)
             
         assert empty_graph.get_weight("A", "B") == 10.0
+    
+    def test_remove_edge_updates_in_degrees_and_cache(self, simple_weighted_graph):
+        assert simple_weighted_graph.get_degree("B") == 2
+        
+        simple_weighted_graph.is_connected()
+        assert len(simple_weighted_graph._connection_cache) > 0
+        
+        simple_weighted_graph.remove_edge("A", "B")
+        
+        assert "B" not in simple_weighted_graph.get_neighbors("A")
+        assert "A" not in simple_weighted_graph.get_neighbors("B")
+        
+        assert simple_weighted_graph.get_degree("B") == 1
+        
+        assert len(simple_weighted_graph._connection_cache) == 0
+
+    def test_remove_edge_raises_error_if_not_exists(self, empty_graph):
+        empty_graph.add_edge("A", "B")
+        
+        with pytest.raises(KeyError, match="não existe no grafo"):
+            empty_graph.remove_edge("A", "C")
 
     def test_get_nodes_returns_all_unique_nodes(self, empty_graph):
         empty_graph.add_edge(1, 2)
