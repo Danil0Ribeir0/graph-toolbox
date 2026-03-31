@@ -156,7 +156,6 @@ class TestGraphAlgorithms:
         assert len(mst.get_nodes()) == 3
     
     def test_prim_raises_error_for_directed_graph(self, empty_directed_graph):
-        """Garante que o Algoritmo de Prim rejeita grafos direcionados."""
         empty_directed_graph.add_edge("A", "B", 1.0)
         empty_directed_graph.add_edge("B", "C", 2.0)
         
@@ -222,3 +221,18 @@ class TestGraphSerialization:
         assert loaded_graph.directed == simple_weighted_graph.directed
         assert loaded_graph.get_weight("A", "C") == 10.0
         assert loaded_graph.get_degree("B") == 2
+    
+    def test_from_dict_raises_error_for_missing_directed_key(self):
+        invalid_data = {
+            "adj_list": {"A": {}}
+        }
+        with pytest.raises(ValueError, match="não contém a chave obrigatória 'directed'"):
+            Graph.from_dict(invalid_data)
+
+    def test_from_dict_raises_error_for_invalid_directed_type(self):
+        invalid_data = {
+            "directed": "True",  # Uma string em vez de um booleano
+            "adj_list": {"A": {}}
+        }
+        with pytest.raises(TypeError, match="deve ser um booleano"):
+            Graph.from_dict(invalid_data)

@@ -177,6 +177,11 @@ class Graph:
     
     @classmethod
     def from_dict(cls, data: dict) -> 'Graph':
+        if "directed" not in data:
+            raise ValueError("O dicionário/JSON fornecido não contém a chave obrigatória 'directed'.")
+        if not isinstance(data["directed"], bool):
+            raise TypeError(f"A chave 'directed' deve ser um booleano (True/False), mas recebeu {type(data['directed']).__name__}.")
+        
         directed = data.get("directed", False)
         g = cls(directed=directed)
         
