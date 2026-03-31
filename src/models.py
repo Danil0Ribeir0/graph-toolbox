@@ -67,7 +67,7 @@ class Graph:
     def is_connected(self, connection_type: str = "strong") -> bool:
         nodes = self.get_nodes()
         if not nodes:
-            return True
+            return False
 
         if not self.directed:
             return len(self.bfs(nodes[0])) == len(nodes)

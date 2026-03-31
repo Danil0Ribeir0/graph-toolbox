@@ -54,7 +54,7 @@ class TestGraphModels:
     
     def test_add_edge_warns_on_overwrite(self, empty_graph):
         import warnings
-        
+
         empty_graph.add_edge("A", "B", 5.0)
         
         with pytest.warns(UserWarning, match="já existe. O peso foi sobrescrito"):
@@ -68,6 +68,9 @@ class TestGraphModels:
         nodes = empty_graph.get_nodes()
         assert len(nodes) == 3
         assert set(nodes) == {1, 2, 3}
+
+    def test_empty_graph_is_not_connected(self, empty_graph):
+        assert empty_graph.is_connected() is False
 
     def test_is_connected_returns_true_for_connected_graph(self, simple_weighted_graph):
         assert simple_weighted_graph.is_connected() is True
