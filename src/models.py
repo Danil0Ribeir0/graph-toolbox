@@ -102,21 +102,22 @@ class Graph:
         return len(visited) == len(nodes)
 
     def _is_weakly_connected(self, nodes: List[Hashable]) -> bool:
-        undirected_adj: Dict[Hashable, Set[Hashable]] = {node: set() for node in nodes}
-        for u in self.adj_list:
-            for v in self.adj_list[u]:
-                undirected_adj[u].add(v)
-                undirected_adj[v].add(u)
-
         visited: Set[Hashable] = {nodes[0]}
         queue: deque = deque([nodes[0]])
+        
         while queue:
             current = queue.popleft()
-            for neighbor in undirected_adj[current]:
+            
+            for neighbor in self.get_neighbors(current):
                 if neighbor not in visited:
                     visited.add(neighbor)
                     queue.append(neighbor)
-
+                    
+            for u in self.adj_list:
+                if current in self.adj_list[u] and u not in visited:
+                    visited.add(u)
+                    queue.append(u)
+                    
         return len(visited) == len(nodes)
 
     def get_out_degree(self, node: Hashable) -> int:
