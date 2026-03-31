@@ -53,15 +53,16 @@ class Graph:
                 total += sum(self.adj_list[u].values())
             return total
 
-        seen_edges: Set[frozenset] = set()
-
+        seen_edges: Set[Tuple[Hashable, Hashable]] = set()
+        
         for u in self.adj_list:
             for v, weight in self.adj_list[u].items():
-                edge = frozenset([u, v])
+                edge = (u, v) if hash(u) < hash(v) else (v, u)
+                
                 if edge not in seen_edges:
                     total += weight
                     seen_edges.add(edge)
-
+                    
         return total
 
     def is_connected(self, connection_type: str = "strong") -> bool:
