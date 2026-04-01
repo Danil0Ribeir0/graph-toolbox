@@ -202,6 +202,43 @@ class TestGraphAlgorithms:
         with pytest.raises(ValueError, match="não existe no grafo"):
             PathFinder.dijkstra(empty_graph, "Z")
 
+    def test_bfs_distances_without_target(self, empty_graph):
+        empty_graph.add_edge("A", "B")
+        empty_graph.add_edge("B", "C")
+        empty_graph.add_edge("A", "D")
+        empty_graph.add_edge("D", "E")
+        
+        distances = PathFinder.bfs_shortest_path(empty_graph, start_node="A")
+        
+        assert distances["A"] == 0
+        assert distances["B"] == 1
+        assert distances["D"] == 1
+        assert distances["C"] == 2
+        assert distances["E"] == 2
+
+    def test_bfs_path_with_target(self, empty_graph):
+        empty_graph.add_edge("A", "B")
+        empty_graph.add_edge("B", "C")
+        
+        path = PathFinder.bfs_shortest_path(empty_graph, start_node="A", target_node="C")
+        assert path == ["A", "B", "C"]
+
+    def test_bfs_path_same_start_and_target(self, empty_graph):
+        empty_graph.add_edge("A", "B")
+        
+        path = PathFinder.bfs_shortest_path(empty_graph, start_node="A", target_node="A")
+        assert path == ["A"]
+
+    def test_bfs_unreachable_target(self, disconnected_graph):
+        path = PathFinder.bfs_shortest_path(disconnected_graph, start_node=1, target_node=3)
+        
+        assert path == []
+
+    def test_bfs_invalid_start_node(self, empty_graph):
+        empty_graph.add_edge("A", "B")
+        with pytest.raises(ValueError, match="não existe no grafo"):
+            PathFinder.bfs_shortest_path(empty_graph, start_node="X")
+
     def test_prim_mst_total_weight(self):
         g = Graph()
         g.add_edge("A", "B", 1.0)

@@ -1,5 +1,6 @@
 import heapq
-from typing import Dict, Optional, Tuple, Hashable, List, Set
+from collections import deque
+from typing import Dict, Optional, Tuple, Hashable, List, Set, Union
 from src.models import Graph
 
 
@@ -51,6 +52,40 @@ class PathFinder:
                 paths[node] = path
 
         return reachable_distances, paths
+    
+    @staticmethod
+    def bfs_shortest_path(graph: Graph, start_node: Hashable, target_node: Hashable = None) -> Union[Dict[Hashable, int], List[Hashable]]:
+        if start_node not in graph.get_nodes():
+            raise ValueError(f"O nó inicial '{start_node}' não existe no grafo.")
+
+        distances: Dict[Hashable, int] = {start_node: 0}
+        predecessors: Dict[Hashable, Optional[Hashable]] = {start_node: None}
+        queue: deque = deque([start_node])
+
+        while queue:
+            current = queue.popleft()
+
+            if target_node is not None and current == target_node:
+                break
+
+            for neighbor in graph.get_neighbors(current):
+                if neighbor not in distances:
+                    distances[neighbor] = distances[current] + 1
+                    predecessors[neighbor] = current
+                    queue.append(neighbor)
+        
+        if target_node is not None:
+            if target_node not in predecessors:
+                return []
+                
+            path: List[Hashable] = []
+            step = target_node
+            while step is not None:
+                path.append(step)
+                step = predecessors[step]
+            return path[::-1]
+
+        return distances
 
 
 class SpanningTree:
